@@ -1,23 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author asmaa
- */
+// Product: same role as Robot in the course slides.
 public class Level {
+    private MapGenerator map;
+    private int delay;
+    private int totalBricks;
 
-    private final MapGenerator map;
-    private final int delay;
-    private final int totalBricks;
+    public Level() { }
 
-    public Level(MapGenerator map, int delay, int totalBricks) {
-        this.map = map;
-        this.delay = delay;
-        this.totalBricks = totalBricks;
-    }
+    public void setMap(MapGenerator map) { this.map = map; }
+    public void setDelay(int delay) { this.delay = delay; }
+    public void setTotalBricks(int totalBricks) { this.totalBricks = totalBricks; }
 
     public MapGenerator getMap() { return map; }
     public int getDelay() { return delay; }

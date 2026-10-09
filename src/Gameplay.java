@@ -24,6 +24,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     private int hscore;
     private int totalBricks;
     private int level = 1;
+    private boolean levelWon = false;
 
     private Timer timer;
     private int delay = 8;
@@ -36,9 +37,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     private int ballYdir = -2;
 
     private MapGenerator map;
-    private final LevelDirector director = new LevelDirector();
 
-    JFrame frame = new JFrame();
 
     public Gameplay() {
         addKeyListener(this);
@@ -46,7 +45,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay, this);
-        applyLevel(director.forLevel(1));
+        applyLevel(LevelDirector.forLevel(1));
         timer.start();
     }
 
@@ -59,16 +58,19 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
 
     private void startLevel(int lvl) {
         play = true;
+        levelWon = false;
         ballposX = 120;
         ballposY = 350;
         ballXdir = -1;
         ballYdir = -2;
         playerX = 310;
-        applyLevel(director.forLevel(lvl));
+        applyLevel(LevelDirector.forLevel(lvl));
         repaint();
     }
 
-    public void paint(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         // background
         g.setColor(Color.black);
         g.fillRect(1, 25, 692, 592);
@@ -101,6 +103,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
 
         // winning the level/game
         if (totalBricks <= 0) {
+            levelWon = true;
             play = false;
             ballXdir = 0;
             ballYdir = 0;
@@ -142,7 +145,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             g.drawString("Press (Space) to Restart", 255, 500);
         }
 
-        g.dispose();
     }
 
     public void mouseMoved(MouseEvent m) {
@@ -171,7 +173,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            if (!play) {
+            if (!play && levelWon && level < LevelDirector.LEVEL_COUNT) {
                 level++;
                 if (level <= LevelDirector.LEVEL_COUNT) {
                     startLevel(level);
@@ -186,7 +188,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            this.setVisible(false);
+            timer.stop();
+            java.awt.Window window = SwingUtilities.getWindowAncestor(this);
+            if (window != null) {
+                window.dispose();
+            }
             Menu.getInstance().showMenu();
         }
     }
@@ -211,7 +217,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     }
 
     public void actionPerformed(ActionEvent e) {
-        timer.start();
         if (play) {
             if (new Rectangle(ballposX, ballposY, 20, 20).intersects(new Rectangle(playerX, 550, 30, 8))) {
                 ballYdir = -ballYdir;

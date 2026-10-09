@@ -1,34 +1,33 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author asmaa
- */
+// Director: same role as RobotEngineer in the course slides.
 public class LevelDirector {
-
     public static final int LEVEL_COUNT = 3;
+    private final LevelBuilder levelBuilder;
 
-    public Level easy() {
-        return new LevelBuilder().rows(3).cols(7).strongPercent(0).delay(8).build();
+    public LevelDirector(LevelBuilder levelBuilder) {
+        this.levelBuilder = levelBuilder;
     }
 
-    public Level medium() {
-        return new LevelBuilder().rows(4).cols(9).strongPercent(30).delay(7).build();
+    public void makeLevel() {
+        levelBuilder.buildMap();
+        levelBuilder.buildDelay();
+        levelBuilder.buildTotalBricks();
     }
 
-    public Level hard() {
-        return new LevelBuilder().rows(4).cols(12).strongPercent(50).delay(6).build();
+    public Level getLevel() {
+        return levelBuilder.getLevel();
     }
 
-    public Level forLevel(int level) {
-        switch (level) {
-            case 1:  return easy();
-            case 2:  return medium();
-            case 3:  return hard();
-            default: throw new IllegalArgumentException("No such level: " + level);
+    // Chooses the settings; construction itself is performed by the Director.
+    public static Level forLevel(int number) {
+        LevelBuilder builder;
+        switch (number) {
+            case 1: builder = new ConcreteLevelBuilder(3, 7, 0, 8); break;
+            case 2: builder = new ConcreteLevelBuilder(4, 9, 30, 7); break;
+            case 3: builder = new ConcreteLevelBuilder(4, 12, 50, 6); break;
+            default: throw new IllegalArgumentException("No such level: " + number);
         }
+        LevelDirector director = new LevelDirector(builder);
+        director.makeLevel();
+        return director.getLevel();
     }
 }
