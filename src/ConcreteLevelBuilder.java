@@ -1,3 +1,4 @@
+
 import java.util.Random;
 
 // Concrete Builder: same role as OldRobotBuilder in the course slides.
@@ -18,6 +19,7 @@ public class ConcreteLevelBuilder implements LevelBuilder {
         if (delay <= 0) {
             throw new IllegalArgumentException("delay must be positive");
         }
+
         this.level = new Level();
         this.rows = rows;
         this.cols = cols;
@@ -27,17 +29,19 @@ public class ConcreteLevelBuilder implements LevelBuilder {
 
     @Override
     public void buildMap() {
-        BrickCreator normalCreator = new NormalBrickCreator();
-        BrickCreator strongCreator = new StrongBrickCreator();
+        BrickFactory factory = new BrickFactory();
         Random random = new Random();
         Brick[][] bricks = new Brick[rows][cols];
+
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                BrickCreator creator = random.nextInt(100) < strongPercent
-                        ? strongCreator : normalCreator;
-                bricks[i][j] = creator.createBrick();
+                String type = random.nextInt(100) < strongPercent
+                        ? "strong" : "normal";
+
+                bricks[i][j] = factory.createBrick(type);
             }
         }
+
         level.setMap(new MapGenerator(bricks));
     }
 

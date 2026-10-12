@@ -2,7 +2,7 @@ import java.awt.Font;
 import javax.swing.*;
 
 public class Menu extends JFrame {
-    private static Menu instance;
+    private static Menu instance = null;
     private final JButton playButton;
 
     private Menu() {
