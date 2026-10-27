@@ -4,6 +4,8 @@ import javax.swing.*;
 public class Menu extends JFrame {
     private static Menu instance = null;
     private final JButton playButton;
+    private final SoundPlayer clickSound = new ClipSoundAdapter("sounds/click.wav");
+
 
     private Menu() {
         super("Breakout - Main Menu");
