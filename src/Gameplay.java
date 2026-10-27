@@ -24,6 +24,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     private int ballYdir = -2;
 
     private MapGenerator map;
+    private SoundPlayer hitSound = new ClipSoundAdapter("sounds/hit.wav");
+
 
     public Gameplay() {
         addKeyListener(this);
@@ -301,6 +303,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
                         Rectangle brickRect = rect;
 
                         if (ballRect.intersects(brickRect)) {
+                            hitSound.play();
 
                             // A strong brick survives until its last hit
                             if (map.hitBrick(i, j)) {
