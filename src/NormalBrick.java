@@ -1,22 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author asmaa
- */
 import java.awt.Color;
 
-public class NormalBrick extends Brick {
+public class NormalBrick implements Brick {
 
-    public NormalBrick() {
-        super(1);
+    private int hitsLeft = 1;
+
+    @Override
+    public boolean hit() {
+        hitsLeft--;
+        return hitsLeft <= 0;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return hitsLeft <= 0;
     }
 
     @Override
     public Color getColor() {
-        return Color.white;
+        return Color.YELLOW;
     }
 }

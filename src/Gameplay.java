@@ -1,20 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author asmaa
- */
-
-import java.awt.event.*;
-
-import javax.swing.*;
 
 import java.awt.*;
-
-import javax.swing.Timer;
+import java.awt.event.*;
+import javax.swing.*;
 
 public class Gameplay extends JPanel implements KeyListener, ActionListener, MouseMotionListener {
 
@@ -37,6 +24,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     private int ballYdir = -2;
 
     private MapGenerator map;
+    private SoundPlayer hitSound = new ClipSoundAdapter("sounds/hit.wav");
 
 
     public Gameplay() {
@@ -44,12 +32,60 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
         addMouseMotionListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
+
         timer = new Timer(delay, this);
-        applyLevel(LevelDirector.forLevel(1));
+        applyLevel(createLevel(1));
         timer.start();
     }
 
-    // Takes the map, brick count and speed from a Level built by the Builder
+    // Client: creates the Builder and Director
+    private Level createLevel(int levelNumber) {
+
+        int rows;
+        int cols;
+        int strongPercent;
+        int delay;
+
+        switch (levelNumber) {
+            case 1:
+                rows = 3;
+                cols = 7;
+                strongPercent = 0;
+                delay = 8;
+                break;
+
+            case 2:
+                rows = 4;
+                cols = 9;
+                strongPercent = 30;
+                delay = 7;
+                break;
+
+            case 3:
+                rows = 4;
+                cols = 12;
+                strongPercent = 50;
+                delay = 6;
+                break;
+
+            default:
+                throw new IllegalArgumentException(
+                        "No such level: " + levelNumber);
+        }
+
+        LevelBuilder levelBuilder =
+                new ConcreteLevelBuilder(rows, cols, strongPercent, delay);
+
+        LevelDirector levelEng = new LevelDirector(levelBuilder);
+
+        levelEng.makeLevel();
+
+        Level firstLevel = levelEng.getLevel();
+
+        return firstLevel;
+    }
+
+    // Takes the map, brick count and speed from a Level
     private void applyLevel(Level lvl) {
         map = lvl.getMap();
         totalBricks = lvl.getTotalBricks();
@@ -64,13 +100,15 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
         ballXdir = -1;
         ballYdir = -2;
         playerX = 310;
-        applyLevel(LevelDirector.forLevel(lvl));
+
+        applyLevel(createLevel(lvl));
         repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         // background
         g.setColor(Color.black);
         g.fillRect(1, 25, 692, 592);
@@ -78,12 +116,10 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
         // drawing map
         map.draw((Graphics2D) g);
 
-        // score display 		
+        // score display
         g.setColor(Color.black);
         g.setFont(new Font("serif", Font.BOLD, 18));
 
-        //g.drawString("Score:"+score, 550,15);
-        // g.drawString("Highest Score:"+hscore, 20,15);
         g.setFont(new Font("serif", Font.PLAIN, 15));
 
         g.setColor(Color.black);
@@ -107,18 +143,22 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             play = false;
             ballXdir = 0;
             ballYdir = 0;
+
             g.setColor(Color.RED);
             g.setFont(new Font("serif", Font.BOLD, 30));
             g.drawString("You Won", 275, 300);
             g.drawString("Score:" + score, 285, 330);
-//             if(score>hscore)
-//             {
-//                 hscore=score;
-//                 g.drawString("New High Score!", 265,360);
-//             }
+
+            // if(score>hscore)
+            // {
+            //     hscore=score;
+            //     g.drawString("New High Score!", 265,360);
+            // }
+
             g.setColor(Color.RED);
             g.setFont(new Font("serif", Font.BOLD, 20));
-            if (level < 3) {
+
+            if (level < LevelDirector.LEVEL_COUNT) {
                 g.drawString("Press (Enter) for Next Level", 210, 500);
             } else {
                 g.drawString("You have beaten the game!", 215, 500);
@@ -130,11 +170,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             play = false;
             ballXdir = 0;
             ballYdir = 0;
+
             g.setColor(Color.RED);
             g.setFont(new Font("serif", Font.BOLD, 30));
 
             g.drawString("Game Over", 270, 300);
             g.drawString("Score:" + score, 285, 330);
+
             if (score > hscore) {
                 hscore = score;
                 g.drawString("New High Score!", 245, 360);
@@ -144,7 +186,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             g.setFont(new Font("serif", Font.BOLD, 20));
             g.drawString("Press (Space) to Restart", 255, 500);
         }
-
     }
 
     public void mouseMoved(MouseEvent m) {
@@ -172,14 +213,17 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
                 moveLeft();
             }
         }
+
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (!play && levelWon && level < LevelDirector.LEVEL_COUNT) {
                 level++;
+
                 if (level <= LevelDirector.LEVEL_COUNT) {
                     startLevel(level);
                 }
             }
         }
+
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (!play) {
                 score = 0;
@@ -187,12 +231,15 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
                 startLevel(level);
             }
         }
+
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             timer.stop();
+
             java.awt.Window window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 window.dispose();
             }
+
             Menu.getInstance().showMenu();
         }
     }
@@ -218,42 +265,61 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
 
     public void actionPerformed(ActionEvent e) {
         if (play) {
-            if (new Rectangle(ballposX, ballposY, 20, 20).intersects(new Rectangle(playerX, 550, 30, 8))) {
+            if (new Rectangle(ballposX, ballposY, 20, 20)
+                    .intersects(new Rectangle(playerX, 550, 30, 8))) {
+
                 ballYdir = -ballYdir;
                 ballXdir = -2;
-            } else if (new Rectangle(ballposX, ballposY, 20, 20).intersects(new Rectangle(playerX + 70, 550, 30, 8))) {
+
+            } else if (new Rectangle(ballposX, ballposY, 20, 20)
+                    .intersects(new Rectangle(playerX + 70, 550, 30, 8))) {
+
                 ballYdir = -ballYdir;
                 ballXdir = ballXdir + 1;
-            } else if (new Rectangle(ballposX, ballposY, 20, 20).intersects(new Rectangle(playerX + 30, 550, 40, 8))) {
+
+            } else if (new Rectangle(ballposX, ballposY, 20, 20)
+                    .intersects(new Rectangle(playerX + 30, 550, 40, 8))) {
+
                 ballYdir = -ballYdir;
             }
 
-            // check map collision with the ball		
+            // check map collision with the ball
             A:
             for (int i = 0; i < map.map.length; i++) {
                 for (int j = 0; j < map.map[0].length; j++) {
+
                     if (!map.map[i][j].isDestroyed()) {
                         int brickX = j * map.brickWidth + 80;
                         int brickY = i * map.brickHeight + 50;
                         int brickWidth = map.brickWidth;
                         int brickHeight = map.brickHeight;
 
-                        Rectangle rect = new Rectangle(brickX, brickY, brickWidth, brickHeight);
-                        Rectangle ballRect = new Rectangle(ballposX, ballposY, 20, 20);
+                        Rectangle rect = new Rectangle(
+                                brickX, brickY, brickWidth, brickHeight);
+
+                        Rectangle ballRect = new Rectangle(
+                                ballposX, ballposY, 20, 20);
+
                         Rectangle brickRect = rect;
 
                         if (ballRect.intersects(brickRect)) {
-                            // a strong brick survives until its last hit
+                            hitSound.play();
+
+                            // A strong brick survives until its last hit
                             if (map.hitBrick(i, j)) {
                                 totalBricks--;
                             }
+
                             score += 5;
 
                             // when the ball hits right or left of brick
-                            if (ballposX + 19 <= brickRect.x || ballposX + 1 >= brickRect.x + brickRect.width) {
+                            if (ballposX + 19 <= brickRect.x
+                                    || ballposX + 1 >= brickRect.x + brickRect.width) {
+
                                 ballXdir = -ballXdir;
-                            } // when the ball hits top or bottom of brick
-                            else {
+
+                            } else {
+                                // when the ball hits top or bottom of brick
                                 ballYdir = -ballYdir;
                             }
 
@@ -269,9 +335,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             if (ballposX < 0) {
                 ballXdir = -ballXdir;
             }
+
             if (ballposY < 0) {
                 ballYdir = -ballYdir;
             }
+
             if (ballposX > 670) {
                 ballXdir = -ballXdir;
             }
@@ -279,5 +347,4 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
             repaint();
         }
     }
-
 }

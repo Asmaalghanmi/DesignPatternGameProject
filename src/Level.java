@@ -1,4 +1,3 @@
-// Product: same role as Robot in the course slides.
 public class Level {
     private MapGenerator map;
     private int delay;
