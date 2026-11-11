@@ -1,4 +1,3 @@
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -27,7 +26,10 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
     private SoundPlayer hitSound = new ClipSoundAdapter("sounds/hit.wav");
 
 
-    public Gameplay() {
+    private final GameFacade facade;
+
+    public Gameplay(GameFacade facade) {
+        this.facade = facade;
         addKeyListener(this);
         addMouseMotionListener(this);
         setFocusable(true);
@@ -233,15 +235,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener, Mou
         }
 
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            timer.stop();
-
-            java.awt.Window window = SwingUtilities.getWindowAncestor(this);
-            if (window != null) {
-                window.dispose();
-            }
-
-            Menu.getInstance().showMenu();
+            facade.backToMenu();
         }
+    }
+
+    // Stops the game loop (called by the Facade when the game is closed)
+    public void stop() {
+        timer.stop();
     }
 
     public void keyReleased(KeyEvent e) {
