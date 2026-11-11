@@ -4,8 +4,7 @@ import javax.swing.*;
 public class Menu extends JFrame {
     private static Menu instance = null;
     private final JButton playButton;
-    private final SoundPlayer clickSound = new ClipSoundAdapter("sounds/click.wav");
-
+    private Runnable playAction = () -> { };
 
     private Menu() {
         super("Breakout - Main Menu");
@@ -22,7 +21,7 @@ public class Menu extends JFrame {
 
         playButton = new JButton("PLAY BREAKOUT");
         playButton.setBounds(240, 310, 220, 45);
-        playButton.addActionListener(e -> startGame());
+        playButton.addActionListener(e -> playAction.run());
         add(playButton);
     }
 
@@ -33,21 +32,13 @@ public class Menu extends JFrame {
         return instance;
     }
 
+    // Set by the Facade: what happens when PLAY is pressed
+    public void setPlayAction(Runnable playAction) {
+        this.playAction = playAction;
+    }
+
     public void showMenu() {
         setVisible(true);
         toFront();
-    }
-
-    private void startGame() {
-        Gameplay gameplay = new Gameplay();
-        JFrame gameWindow = new JFrame("Break The Bricks");
-        gameWindow.setSize(700, 700);
-        gameWindow.setResizable(false);
-        gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        gameWindow.setLocationRelativeTo(null);
-        gameWindow.add(gameplay);
-        setVisible(false);
-        gameWindow.setVisible(true);
-        gameplay.requestFocusInWindow();
     }
 }
